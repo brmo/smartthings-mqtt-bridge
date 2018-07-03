@@ -100,6 +100,19 @@ function saveState () {
     });
 }
 
+function publishHistory(){
+    var state;
+
+    winston.info('Publishing history states...');
+    state = loadSavedState();
+    history = state.history;
+
+    for(var index in history) {
+        client.publish(index, history[index], {retain: config.mqtt[RETAIN]})
+    }
+
+}
+
 /**
  * Migrate the configuration from the current version to the latest version
  * @method migrateState
@@ -334,6 +347,7 @@ async.series([
             if (subscriptions.length > 0) {
                 client.subscribe(subscriptions);
             }
+            publishHistory();
             next();
             // @TODO Not call this twice if we get disconnected
             next = function () {};
@@ -343,7 +357,7 @@ async.series([
         winston.info('Configuring autosave');
 
         // Save current state every 15 minutes
-        setInterval(saveState, 15 * 60 * 1000);
+        setInterval(saveState, 1 * 60 * 1000);
 
         process.nextTick(next);
     },
