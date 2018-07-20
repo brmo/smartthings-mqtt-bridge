@@ -108,7 +108,9 @@ function publishHistory(){
     history = state.history;
 
     for(var index in history) {
-        client.publish(index, history[index], {retain: config.mqtt[RETAIN]})
+        if(!index.indexOf("/set") >= 0){
+            client.publish(index, history[index], {retain: config.mqtt[RETAIN]})
+        }
     }
 
 }
